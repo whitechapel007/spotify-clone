@@ -56,6 +56,13 @@ export class User {
   })
   country?: string;
 
+  @Column({
+    nullable: true,
+    select: false,
+    type: 'text',
+  })
+  hashedRefreshToken: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

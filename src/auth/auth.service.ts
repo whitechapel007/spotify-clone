@@ -12,6 +12,7 @@ import { SignupDto } from './dto/signup.dto';
 import { SigninDto } from './dto/signin.dto';
 
 import { UserService } from '../user/user.service';
+import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -24,67 +25,104 @@ export class AuthService {
     const existing = await this.userService.findByEmail(dto.email);
 
     if (existing) {
-      throw new ConflictException(
-        'Email already exists',
-      );
+      throw new ConflictException('Email already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(
-      dto.password,
-      10,
-    );
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     const user = await this.userService.create({
       ...dto,
       password: hashedPassword,
     });
 
-    const token = await this.generateToken(user.id);
+    const tokens = await this.generateTokens(user.id);
+
+    const hashedRefreshToken = await bcrypt.hash(tokens.refreshToken, 10);
+
+    await this.userService.updateRefreshToken(user.id, hashedRefreshToken);
+
+    const { password, ...userWithoutPassword } = user;
 
     return {
       message: 'Account created',
-      accessToken: token,
-      user,
+
+      ...tokens,
+      user: userWithoutPassword,
     };
   }
 
   async signin(dto: SigninDto) {
-    const user = await this.userService.findByEmail(
-      dto.email,
-    );
+    const user = await this.userService.findByEmail(dto.email);
 
     if (!user) {
-      throw new UnauthorizedException(
-        'Invalid credentials',
-      );
+      throw new UnauthorizedException('Invalid credentials');
     }
 
-    const validPassword = await bcrypt.compare(
-      dto.password,
-      user.password,
-    );
+    const validPassword = await bcrypt.compare(dto.password, user.password);
 
     if (!validPassword) {
-      throw new UnauthorizedException(
-        'Invalid credentials',
-      );
+      throw new UnauthorizedException('Invalid credentials');
     }
 
-    const token = await this.generateToken(user.id);
+    const tokens = await this.generateTokens(user.id);
+    const hashedRefreshToken = await bcrypt.hash(tokens.refreshToken, 10);
 
-    delete user?.password;
+    await this.userService.updateRefreshToken(user.id, hashedRefreshToken);
+
+    // password is selected as false by default; still safe to remove defensively
+    const { password, ...userWithoutPassword } = user;
 
     return {
-      accessToken: token,
-      user,
+      ...tokens,
+      user: userWithoutPassword,
     };
   }
 
-  private async generateToken(
-    userId: string,
-  ): Promise<string> {
-    return this.jwtService.signAsync({
+  async logout(userId: string) {
+    await this.userService.updateRefreshToken(userId, null);
+
+    return {
+      message: 'Logged out',
+    };
+  }
+
+  private async generateTokens(userId: string) {
+    const payload = {
       sub: userId,
+    };
+
+    const accessToken = await this.jwtService.signAsync(payload, {
+      expiresIn: '15m',
     });
+
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      expiresIn: '30d',
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async refresh(refreshToken: string) {
+    const payload = await this.jwtService.verifyAsync(refreshToken);
+
+    const user = await this.userService.findByIdWithRefreshToken(payload.sub);
+
+    if (!user || !user.hashedRefreshToken) {
+      throw new UnauthorizedException();
+    }
+    const matches = await bcrypt.compare(refreshToken, user.hashedRefreshToken);
+
+    if (!matches) {
+      throw new UnauthorizedException();
+    }
+
+    const tokens = await this.generateTokens(user.id);
+    const hash = await bcrypt.hash(tokens.refreshToken, 10);
+    await this.userService.updateRefreshToken(user.id, hash);
+
+    return tokens;
   }
 }

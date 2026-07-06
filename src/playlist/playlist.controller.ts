@@ -7,7 +7,7 @@ import {
   Param,
   Query,
   Patch,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { PlaylistService } from './playlist.service';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
@@ -16,7 +16,7 @@ import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-
+import { User } from 'src/user/user.entity';
 
 @Controller({
   path: 'playlists',
@@ -29,8 +29,7 @@ export class PlaylistController {
   create(
     @Body()
     playlistDto: CreatePlaylistDto,
-    @CurrentUser() user,
-
+    @CurrentUser() user: User,
   ): Promise<Playlist> {
     return this.playlistService.create(playlistDto, user.id);
   }

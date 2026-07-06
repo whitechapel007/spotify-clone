@@ -67,24 +67,62 @@ export class UserService {
     return user;
   }
 
-  async findByEmail(email: string) {
-  return this.userRepository.findOne({
-    where: {
-      email,
-    },
-    select: {
-      id: true,
-      email: true,
-      password: true,
-      firstName: true,
-      lastName: true,
-      username: true,
-      country: true,
-      avatarUrl: true,
-    },
-  });
-}
+  async updateRefreshToken(
+    userId: string,
 
+    hash: string | null,
+  ) {
+    await this.userRepository.update(userId, {
+      hashedRefreshToken: hash,
+    });
+  }
+
+  async logout(userId: string) {
+    await this.userRepository.update(userId, {
+      hashedRefreshToken: null,
+    });
+
+    return {
+      message: 'Logged out successfully',
+    };
+  }
+
+  async findByEmail(email: string) {
+    return this.userRepository.findOne({
+      where: {
+        email,
+      },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+        firstName: true,
+        lastName: true,
+        username: true,
+        country: true,
+        avatarUrl: true,
+      },
+    });
+  }
+
+  async findByIdWithRefreshToken(id: string) {
+    return this.userRepository.findOne({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+        hashedRefreshToken: true,
+        firstName: true,
+        lastName: true,
+        username: true,
+        avatarUrl: true,
+        country: true,
+      },
+    });
+  }
   async update(id: string, dto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
 

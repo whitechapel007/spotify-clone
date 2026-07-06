@@ -1,11 +1,11 @@
 import {
   Injectable,
   NotFoundException,
-  BadRequestException,
+
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Playlist } from './playlist.entity';
-import {  In, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import { Song } from 'src/song/song.entity';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
@@ -20,10 +20,10 @@ export class PlaylistService {
     @InjectRepository(Song) private readonly songRepository: Repository<Song>,
   ) {}
 
-  async create(dto: CreatePlaylistDto): Promise<Playlist> {
+  async create(dto: CreatePlaylistDto, userId: string): Promise<Playlist> {
     const user = await this.userRepository.findOne({
       where: {
-        id: dto.userId,
+        id: userId,
       },
     });
 

@@ -7,7 +7,7 @@ import { User } from '../user/user.entity';
 import { Playlist } from './playlist.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Song, User, Playlist ])],
+  imports: [TypeOrmModule.forFeature([Song, User, Playlist])],
   controllers: [PlaylistController],
   providers: [PlaylistService],
 })
