@@ -35,7 +35,7 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    const tokens = await this.generateTokens(user.id);
+    const tokens = await this.generateTokens(user);
 
     const hashedRefreshToken = await bcrypt.hash(tokens.refreshToken, 10);
 
@@ -64,7 +64,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const tokens = await this.generateTokens(user.id);
+    const tokens = await this.generateTokens(user);
     const hashedRefreshToken = await bcrypt.hash(tokens.refreshToken, 10);
 
     await this.userService.updateRefreshToken(user.id, hashedRefreshToken);
@@ -86,9 +86,10 @@ export class AuthService {
     };
   }
 
-  private async generateTokens(userId: string) {
+  private async generateTokens(user: User) {
     const payload = {
-      sub: userId,
+      sub: user.id,
+      role: user.role,
     };
 
     const accessToken = await this.jwtService.signAsync(payload, {
@@ -110,7 +111,7 @@ export class AuthService {
 
     const user = await this.userService.findByIdWithRefreshToken(payload.sub);
 
-    if (!user || !user.hashedRefreshToken) {
+    if (!user?.hashedRefreshToken) {
       throw new UnauthorizedException();
     }
     const matches = await bcrypt.compare(refreshToken, user.hashedRefreshToken);
@@ -119,7 +120,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    const tokens = await this.generateTokens(user.id);
+    const tokens = await this.generateTokens(user);
     const hash = await bcrypt.hash(tokens.refreshToken, 10);
     await this.userService.updateRefreshToken(user.id, hash);
 

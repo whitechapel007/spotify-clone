@@ -4,15 +4,18 @@ import {
   Delete,
   Get,
   Post,
-
   Param,
-
   Query,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { SongsService } from './song.service';
 import { CreateSongDto } from './dto/create-song.dto';
 import { UpdateSongDto } from './dto/update-song.dto';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/auth/enums/role.enum';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 // @Controller({
 //   path: 'songs',
@@ -23,6 +26,9 @@ import { UpdateSongDto } from './dto/update-song.dto';
 })
 export class SongsController {
   constructor(private readonly songService: SongsService) {}
+
+  @Roles(Role.ADMIN, Role.ARTIST)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post()
   create(@Body() createSongDto: CreateSongDto) {
     return this.songService.create(createSongDto);

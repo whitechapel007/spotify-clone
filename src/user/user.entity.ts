@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Playlist } from '../playlist/playlist.entity';
 import { Artist } from 'src/artist/artist.entity';
+import { Role } from '../auth/enums/role.enum';
 
 @Entity('users')
 export class User {
@@ -30,6 +31,13 @@ export class User {
     select: false,
   })
   password: string;
+
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.LISTENER,
+  })
+  role: Role;
 
   @Index()
   @Column({
