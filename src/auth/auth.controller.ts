@@ -28,11 +28,7 @@ export class AuthController {
   }
 
   @Post('refresh')
-refresh(
-  @Body() dto: RefreshTokenDto,
-) {
-  return this.authService.refresh(
-    dto.refreshToken,
-  );
-}
+  refresh(@Body() dto: RefreshTokenDto) {
+    return this.authService.refresh(dto.refreshToken);
+  }
 }

@@ -7,20 +7,23 @@ import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RolesGuard } from './guards/roles.guard';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     UserModule,
-    JwtModule.register({
-      secret: 'super-secret-key',
-
-      signOptions: {
-        expiresIn: '1d',
-      },
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.getOrThrow<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: config.getOrThrow('JWT_EXPIRES'),
+        },
+      }),
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy,  RolesGuard],
+  providers: [AuthService, JwtStrategy, RolesGuard],
 })
 export class AuthModule {}

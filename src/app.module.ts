@@ -19,6 +19,7 @@ import { Song } from './song/song.entity';
 import { Artist } from './artist/artist.entity';
 import { ArtistModule } from './artist/artist.module';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -43,6 +44,11 @@ import { AuthModule } from './auth/auth.module';
       entities: [Playlist, User, Song, Artist],
       synchronize: true,
     }),
+
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+
     SongsModule,
     PlaylistModule,
     UserModule,

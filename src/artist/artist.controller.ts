@@ -24,14 +24,8 @@ export class ArtistController {
   }
 
   @Get()
-  findAll(
-    @Query('page') page = 1,
-    @Query('limit') limit = 20,
-  ) {
-    return this.artistService.findAll(
-      Number(page),
-      Number(limit),
-    );
+  findAll(@Query('page') page = 1, @Query('limit') limit = 20) {
+    return this.artistService.findAll(Number(page), Number(limit));
   }
 
   @Get(':id')
@@ -40,10 +34,7 @@ export class ArtistController {
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() dto: UpdateArtistDto,
-  ) {
+  update(@Param('id') id: string, @Body() dto: UpdateArtistDto) {
     return this.artistService.update(id, dto);
   }
 

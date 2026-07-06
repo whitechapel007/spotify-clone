@@ -2,7 +2,6 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-
   ManyToMany,
   JoinTable,
   CreateDateColumn,
@@ -104,7 +103,6 @@ export class Song {
 
   @ManyToMany(() => Playlist, (playlist) => playlist.songs)
   playlists: Playlist[];
-
 
   @ManyToMany(() => Artist, (artist) => artist.songs, {
     cascade: ['insert', 'update'],

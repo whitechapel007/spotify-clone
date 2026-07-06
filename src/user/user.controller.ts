@@ -5,20 +5,16 @@ import {
   Get,
   Param,
   Patch,
-
   Query,
 } from '@nestjs/common';
 
 import { UserService } from './user.service';
-
 
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-
 
   @Get()
   findAll(@Query('page') page = 1, @Query('limit') limit = 20) {
