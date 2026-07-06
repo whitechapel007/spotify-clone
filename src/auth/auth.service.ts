@@ -41,6 +41,7 @@ export class AuthService {
 
     await this.userService.updateRefreshToken(user.id, hashedRefreshToken);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = user;
 
     return {
@@ -70,6 +71,7 @@ export class AuthService {
     await this.userService.updateRefreshToken(user.id, hashedRefreshToken);
 
     // password is selected as false by default; still safe to remove defensively
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = user;
 
     return {
@@ -109,7 +111,9 @@ export class AuthService {
   async refresh(refreshToken: string) {
     const payload = await this.jwtService.verifyAsync(refreshToken);
 
-    const user = await this.userService.findByIdWithRefreshToken(payload.sub);
+    const userId = (payload as Record<string, string>).sub;
+
+    const user = await this.userService.findByIdWithRefreshToken(userId);
 
     if (!user?.hashedRefreshToken) {
       throw new UnauthorizedException();

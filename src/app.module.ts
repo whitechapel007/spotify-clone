@@ -1,4 +1,4 @@
-import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -8,8 +8,6 @@ import { SongsModule } from './song/song.module';
 import { PlaylistModule } from './playlist/playlist.module';
 
 import { UserModule } from './user/user.module';
-import cors from 'cors';
-import helmet from 'helmet';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -58,8 +56,4 @@ import { ConfigModule } from '@nestjs/config';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(cors(), helmet()).forRoutes('songs');
-  }
-}
+export class AppModule {}

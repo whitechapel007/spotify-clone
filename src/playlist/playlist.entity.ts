@@ -8,6 +8,7 @@ import {
   Index,
   ManyToMany,
   JoinTable,
+  RelationId,
 } from 'typeorm';
 import { Song } from '../song/song.entity';
 import { User } from '../user/user.entity';
@@ -55,6 +56,9 @@ export class Playlist {
     onDelete: 'CASCADE',
   })
   user: User;
+
+@RelationId((playlist: Playlist) => playlist.user)
+userId: string;
 
   // Playlist
   @ManyToMany(() => Song, (song) => song.playlists)

@@ -15,6 +15,7 @@ import { Playlist } from './playlist.entity';
 import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PlaylistOwnershipGuard } from './guards/playlist-ownership.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from 'src/user/user.entity';
 
@@ -45,11 +46,13 @@ export class PlaylistController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, PlaylistOwnershipGuard)
   update(@Param('id') id: string, @Body() dto: UpdatePlaylistDto) {
     return this.playlistService.update(id, dto);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, PlaylistOwnershipGuard)
   remove(@Param('id') id: string) {
     return this.playlistService.remove(id);
   }
