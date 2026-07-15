@@ -17,7 +17,7 @@ import { Song } from './song/song.entity';
 import { Artist } from './artist/artist.entity';
 import { ArtistModule } from './artist/artist.module';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -32,19 +32,22 @@ import { ConfigModule } from '@nestjs/config';
       },
     }),
 
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5434,
-      username: 'postgres',
-      password: 'password',
-      database: 'nestdb',
-      entities: [Playlist, User, Song, Artist],
-      synchronize: true,
-    }),
-
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        host: config.getOrThrow<string>('DB_HOST'),
+        port: config.getOrThrow<number>('DB_PORT'),
+        username: config.getOrThrow<string>('DB_USERNAME'),
+        password: config.getOrThrow<string>('DB_PASSWORD'),
+        database: config.getOrThrow<string>('DB_DATABASE'),
+        entities: [Playlist, User, Song, Artist],
+        synchronize: config.get('NODE_ENV') !== 'production',
+      }),
     }),
 
     SongsModule,

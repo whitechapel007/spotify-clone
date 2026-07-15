@@ -15,6 +15,7 @@ import { Playlist } from './playlist.entity';
 import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { PlaylistOwnershipGuard } from './guards/playlist-ownership.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from 'src/user/user.entity';
@@ -36,13 +37,19 @@ export class PlaylistController {
   }
 
   @Get()
-  findAll(@Query('page') page = 1, @Query('limit') limit = 20) {
-    return this.playlistService.findAll(Number(page), Number(limit));
+  @UseGuards(OptionalJwtAuthGuard)
+  findAll(
+    @Query('page') page = 1,
+    @Query('limit') limit = 20,
+    @CurrentUser() user?: User,
+  ) {
+    return this.playlistService.findAll(Number(page), Number(limit), user);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.playlistService.findOne(id);
+  @UseGuards(OptionalJwtAuthGuard)
+  findOne(@Param('id') id: string, @CurrentUser() user?: User) {
+    return this.playlistService.findOne(id, user);
   }
 
   @Patch(':id')

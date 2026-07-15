@@ -123,6 +123,12 @@ export class ArtistService {
       where: { id },
       relations: {
         songs: true,
+        user: true,
+      },
+      select: {
+        user: {
+          id: true,
+        },
       },
     });
 

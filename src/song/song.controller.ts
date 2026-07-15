@@ -43,10 +43,15 @@ export class SongsController {
     return this.songService.findOne(id);
   }
 
+  @Roles(Role.ADMIN, Role.ARTIST)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateSongDto) {
     return this.songService.update(id, dto);
   }
+
+  @Roles(Role.ADMIN, Role.ARTIST)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.songService.remove(id);

@@ -6,6 +6,8 @@ import { User } from 'src/user/user.entity';
 import { Song } from 'src/song/song.entity';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { UpdatePlaylistDto } from './dto/update-playlist.dto';
+import { Role } from 'src/auth/enums/role.enum';
+import { isOwnerOrAdmin } from './guards/is-owner-or-admin';
 
 @Injectable()
 export class PlaylistService {
@@ -38,8 +40,16 @@ export class PlaylistService {
     return this.playlistRepository.save(playlist);
   }
 
-  async findAll(page = 1, limit = 20) {
+  async findAll(page = 1, limit = 20, requestingUser?: User) {
+    const isAdmin = requestingUser?.role === Role.ADMIN;
+
     const [items, total] = await this.playlistRepository.findAndCount({
+      where: isAdmin
+        ? {}
+        : requestingUser
+          ? [{ isPublic: true }, { userId: requestingUser.id }]
+          : { isPublic: true },
+
       skip: (page - 1) * limit,
 
       take: limit,
@@ -61,7 +71,7 @@ export class PlaylistService {
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, requestingUser?: User) {
     const playlist = await this.playlistRepository.findOne({
       where: {
         id,
@@ -74,6 +84,10 @@ export class PlaylistService {
     });
 
     if (!playlist) {
+      throw new NotFoundException('Playlist not found');
+    }
+
+    if (!playlist.isPublic && !isOwnerOrAdmin(requestingUser, playlist.userId)) {
       throw new NotFoundException('Playlist not found');
     }
 

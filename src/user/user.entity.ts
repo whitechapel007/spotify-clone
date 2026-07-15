@@ -32,6 +32,13 @@ export class User {
   })
   password: string;
 
+  @Column({ nullable: true, select: false })
+  twoFactorSecret?: string | null;
+
+  @Column({ default: false })
+  isTwoFactorEnabled: boolean;
+
+
   @Column({
     type: 'enum',
     enum: Role,

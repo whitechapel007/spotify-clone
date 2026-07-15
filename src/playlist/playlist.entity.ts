@@ -57,8 +57,8 @@ export class Playlist {
   })
   user: User;
 
-@RelationId((playlist: Playlist) => playlist.user)
-userId: string;
+  @RelationId((playlist: Playlist) => playlist.user)
+  userId: string;
 
   // Playlist
   @ManyToMany(() => Song, (song) => song.playlists)

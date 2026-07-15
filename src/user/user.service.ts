@@ -123,6 +123,39 @@ export class UserService {
       },
     });
   }
+
+  async findByIdWithTwoFactorSecret(id: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        twoFactorSecret: true,
+        isTwoFactorEnabled: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
+  async setTwoFactorSecret(userId: string, secret: string | null) {
+    await this.userRepository.update(userId, {
+      twoFactorSecret: secret,
+    });
+  }
+
+  async setTwoFactorEnabled(userId: string, enabled: boolean) {
+    await this.userRepository.update(userId, {
+      isTwoFactorEnabled: enabled,
+    });
+  }
   async update(id: string, dto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
 

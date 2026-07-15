@@ -7,7 +7,7 @@ import {
 import { PlaylistService } from '../playlist.service';
 import type { Request } from 'express';
 import type { User } from '../../user/user.entity';
-import { Role } from '../../auth/enums/role.enum';
+import { isOwnerOrAdmin } from './is-owner-or-admin';
 
 interface AuthenticatedRequest extends Request {
   user?: User;
@@ -34,19 +34,9 @@ export class PlaylistOwnershipGuard implements CanActivate {
       throw new ForbiddenException('Playlist ID not found');
     }
 
-    // Check if user is admin
-    if (user.role === Role.ADMIN) {
-      return true;
-    }
+    const playlist = await this.playlistService.findOne(playlistId, user);
 
-    // Check if user is the owner
-    const playlist = await this.playlistService.findOne(playlistId);
-
-    if (!playlist) {
-      throw new ForbiddenException('Playlist not found');
-    }
-
-    if (playlist.userId !== user.id) {
+    if (!isOwnerOrAdmin(user, playlist.userId)) {
       throw new ForbiddenException('You do not own this playlist.');
     }
     return true;
