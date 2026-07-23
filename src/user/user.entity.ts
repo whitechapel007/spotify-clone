@@ -32,7 +32,7 @@ export class User {
   })
   password: string;
 
-  @Column({ nullable: true, select: false })
+  @Column({ type: 'varchar', nullable: true, select: false })
   twoFactorSecret?: string | null;
 
   @Column({ default: false })
