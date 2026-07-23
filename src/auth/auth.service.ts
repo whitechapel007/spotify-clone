@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 
 import { JwtService } from '@nestjs/jwt';
@@ -10,15 +11,18 @@ import * as bcrypt from 'bcrypt';
 
 import { SignupDto } from './dto/signup.dto';
 import { SigninDto } from './dto/signin.dto';
+import { TwoFactorSigninDto } from './dto/two-factor-signin.dto';
 
 import { UserService } from '../user/user.service';
 import { User } from 'src/user/user.entity';
+import { TwoFactorService } from './twofactor.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly twoFactorService: TwoFactorService,
   ) {}
 
   async signup(dto: SignupDto) {
@@ -65,6 +69,18 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (user.isTwoFactorEnabled) {
+      const tempToken = await this.jwtService.signAsync(
+        { sub: user.id, type: '2fa-challenge' },
+        { expiresIn: '5m' },
+      );
+
+      return {
+        twoFactorRequired: true,
+        tempToken,
+      };
+    }
+
     const tokens = await this.generateTokens(user);
     const hashedRefreshToken = await bcrypt.hash(tokens.refreshToken, 10);
 
@@ -78,6 +94,41 @@ export class AuthService {
       ...tokens,
       user: userWithoutPassword,
     };
+  }
+
+  async authenticate2fa(dto: TwoFactorSigninDto) {
+    let payload: { sub: string; type?: string };
+
+    try {
+      payload = await this.jwtService.verifyAsync(dto.tempToken);
+    } catch {
+      throw new UnauthorizedException('Invalid or expired session');
+    }
+
+    if (payload.type !== '2fa-challenge') {
+      throw new UnauthorizedException('Invalid or expired session');
+    }
+
+    const user = await this.userService.findByIdWithTwoFactorSecret(
+      payload.sub,
+    );
+
+    if (!user.isTwoFactorEnabled || !user.twoFactorSecret) {
+      throw new BadRequestException(
+        'Two-factor authentication is not enabled for this account',
+      );
+    }
+
+    if (!this.twoFactorService.verifyCode(user.twoFactorSecret, dto.code)) {
+      throw new UnauthorizedException('Invalid two-factor code');
+    }
+
+    const tokens = await this.generateTokens(user);
+    const hashedRefreshToken = await bcrypt.hash(tokens.refreshToken, 10);
+
+    await this.userService.updateRefreshToken(user.id, hashedRefreshToken);
+
+    return tokens;
   }
 
   async logout(userId: string) {

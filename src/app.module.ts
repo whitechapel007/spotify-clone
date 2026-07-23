@@ -18,6 +18,8 @@ import { Artist } from './artist/artist.entity';
 import { ArtistModule } from './artist/artist.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ApiKey } from './api-key/api-key.entity';
+import { ApiKeyModule } from './api-key/api-key.module';
 
 @Module({
   imports: [
@@ -45,7 +47,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         username: config.getOrThrow<string>('DB_USERNAME'),
         password: config.getOrThrow<string>('DB_PASSWORD'),
         database: config.getOrThrow<string>('DB_DATABASE'),
-        entities: [Playlist, User, Song, Artist],
+        entities: [Playlist, User, Song, Artist, ApiKey],
         synchronize: config.get('NODE_ENV') !== 'production',
       }),
     }),
@@ -55,6 +57,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     UserModule,
     ArtistModule,
     AuthModule,
+    ApiKeyModule,
   ],
   controllers: [AppController],
   providers: [AppService],
