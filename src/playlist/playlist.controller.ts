@@ -14,12 +14,12 @@ import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { Playlist } from './playlist.entity';
 import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from 'src/user/user.entity';
 import { SelfOrAdminGuard } from 'src/auth/guards/self-or-admin.guard';
+import { JwtOrApiKeyAuthGuard } from 'src/api-key/guards/jwt-or-api-key-auth.guard';
 
 @Controller({
   path: 'playlists',
@@ -29,7 +29,7 @@ export class PlaylistController {
 
   @Post()
   
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtOrApiKeyAuthGuard)
   create(
     @Body()
     playlistDto: CreatePlaylistDto,
@@ -49,19 +49,19 @@ export class PlaylistController {
   }
 
   @Get(':id')
-   @UseGuards(JwtAuthGuard, SelfOrAdminGuard)
+   @UseGuards(JwtOrApiKeyAuthGuard, SelfOrAdminGuard)
   findOne(@Param('id') id: string, @CurrentUser() user?: User) {
     return this.playlistService.findOne(id, user);
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, SelfOrAdminGuard)
+  @UseGuards(JwtOrApiKeyAuthGuard, SelfOrAdminGuard)
   update(@Param('id') id: string, @Body() dto: UpdatePlaylistDto) {
     return this.playlistService.update(id, dto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, SelfOrAdminGuard)
+  @UseGuards(JwtOrApiKeyAuthGuard, SelfOrAdminGuard)
   remove(@Param('id') id: string) {
     return this.playlistService.remove(id);
   }
