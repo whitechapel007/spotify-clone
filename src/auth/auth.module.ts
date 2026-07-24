@@ -9,7 +9,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { RolesGuard } from './guards/roles.guard';
 import { ConfigService } from '@nestjs/config';
 import { TwoFactorService } from './twofactor.service';
-
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { SelfOrAdminGuard } from './guards/self-or-admin.guard';
 
 @Module({
   imports: [
@@ -27,6 +28,25 @@ import { TwoFactorService } from './twofactor.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RolesGuard, TwoFactorService],
+  providers: [
+    JwtStrategy,
+    JwtAuthGuard,
+    RolesGuard,
+    AuthService,
+    TwoFactorService,
+    SelfOrAdminGuard,
+    TwoFactorService,
+  ],
+  exports: [
+    JwtStrategy,
+
+    JwtAuthGuard,
+
+    RolesGuard,
+
+    SelfOrAdminGuard,
+
+    TwoFactorService,
+  ],
 })
 export class AuthModule {}

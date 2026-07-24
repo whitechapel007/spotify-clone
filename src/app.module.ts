@@ -6,8 +6,10 @@ import { LoggerModule } from 'nestjs-pino';
 
 import { SongsModule } from './song/song.module';
 import { PlaylistModule } from './playlist/playlist.module';
-
 import { UserModule } from './user/user.module';
+import { ArtistModule } from './artist/artist.module';
+import { AuthModule } from './auth/auth.module';
+import { ApiKeyModule } from './api-key/api-key.module';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -15,11 +17,10 @@ import { Playlist } from './playlist/playlist.entity';
 import { User } from './user/user.entity';
 import { Song } from './song/song.entity';
 import { Artist } from './artist/artist.entity';
-import { ArtistModule } from './artist/artist.module';
-import { AuthModule } from './auth/auth.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ApiKey } from './api-key/api-key.entity';
-import { ApiKeyModule } from './api-key/api-key.module';
+
+import { ConfigModule, ConfigService } from '@nestjs/config';
+
 
 @Module({
   imports: [

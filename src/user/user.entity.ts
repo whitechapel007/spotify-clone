@@ -11,6 +11,7 @@ import {
 import { Playlist } from '../playlist/playlist.entity';
 import { Artist } from 'src/artist/artist.entity';
 import { Role } from '../auth/enums/role.enum';
+import { ApiKey } from 'src/api-key/api-key.entity';
 
 @Entity('users')
 export class User {
@@ -37,7 +38,6 @@ export class User {
 
   @Column({ default: false })
   isTwoFactorEnabled: boolean;
-
 
   @Column({
     type: 'enum',
@@ -91,4 +91,8 @@ export class User {
   // User
   @OneToOne(() => Artist, (artist) => artist.user)
   artistProfile?: Artist;
+
+  //apikey
+  @OneToMany(() => ApiKey, (apikey) => apikey.user)
+  apiKeys?: ApiKey[];
 }

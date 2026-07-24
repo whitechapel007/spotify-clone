@@ -5,12 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Song } from '../song/song.entity';
 import { User } from '../user/user.entity';
 import { Playlist } from './playlist.entity';
-import { PlaylistOwnershipGuard } from './guards/playlist-ownership.guard';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Song, User, Playlist])],
+  imports: [TypeOrmModule.forFeature([Song, User, Playlist]), AuthModule],
   controllers: [PlaylistController],
-  providers: [PlaylistService, PlaylistOwnershipGuard],
+  providers: [PlaylistService],
   exports: [PlaylistService],
 })
 export class PlaylistModule {}
